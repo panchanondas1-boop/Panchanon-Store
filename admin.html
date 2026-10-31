@@ -1,0 +1,67 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panchanon Owner - Final</title><style>
+body{margin:0;background:#f6f6f0;font-family:system-ui;padding-bottom:100px}
+.top{display:flex;gap:8px;padding:12px;background:#FFC200;position:sticky;top:0;z-index:10}
+button{padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
+.b1{background:#111;color:#FFC200;flex:1}.b2{background:#fff;flex:1;border:1px solid #ddd}
+.card{background:#fff;margin:10px;padding:12px;border-radius:14px;display:flex;gap:10px;align-items:center;box-shadow:0 2px 8px #0001}
+.thumb{width:70px;height:70px;border-radius:10px;object-fit:cover}
+.preview{width:100%;max-height:240px;object-fit:contain;border-radius:12px;display:none;margin:10px 0;border:3px solid #FFC200}
+input{width:100%;padding:13px;margin:6px 0;border-radius:10px;border:1.5px solid #ccc;box-sizing:border-box;font-size:15px}
+.login{max-width:360px;margin:70px auto;background:#fff;padding:25px;border-radius:20px;text-align:center;box-shadow:0 5px 20px #0002}
+</style></head><body>
+
+<div id="loginBox" class="login">
+<h2>👑 মালিক লগইন</h2>
+<input id="pass" type="text" value="panchanan123" placeholder="পাসওয়ার্ড">
+<button style="width:100%;background:#ff6a00;color:#fff;padding:14px;margin-top:8px" onclick="doLogin()">✅ লগইন</button>
+<p style="font-size:12px;color:#666;margin-top:8px">যেকোনো কিছু লিখলেও খুলবে - তোমার জন্য ফ্রি করে দিলাম</p>
+</div>
+
+<div id="main" style="display:none">
+<div class="top">
+<button id="btnO" class="b1" onclick="showOrders()">📦 Orders <span id="oc">0</span></button>
+<button id="btnA" class="b2" onclick="showAdd()">➕ Add Product</button>
+<span onclick="location.reload()" style="background:#000;color:#fff;padding:12px;border-radius:10px">Logout</span>
+</div>
+
+<div id="orders"></div>
+
+<div id="add" style="display:none;padding:12px">
+<div style="background:#fff;padding:15px;border-radius:16px;border:2px dashed #FFC200">
+<h3 style="margin:0">🛍️ নতুন সবজি - ছবি + নাম + দাম + পরিমাণ</h3>
+<input id="pname" placeholder="নাম - যেমন: বেগুন / টমেটো">
+<input id="pprice" type="number" placeholder="দাম - যেমন: 25">
+<input id="pqty" placeholder="পরিমাণ - যেমন: 500gm / 1kg / 1 পিস">
+<input type="file" id="fileCam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
+<input type="file" id="fileGal" accept="image/*" style="display:none" onchange="onFile(this)">
+<div style="display:flex;gap:8px;margin-top:10px">
+<button style="flex:1;background:#00b050;color:#fff;padding:14px" onclick="fileCam.click()">📸 ক্যামেরা</button>
+<button style="flex:1;background:#007bff;color:#fff;padding:14px" onclick="fileGal.click()">🖼️ গ্যালারি</button>
+</div>
+<img id="preview" class="preview">
+<div id="photoStatus" style="color:green;font-weight:bold;display:none"></div>
+<div id="saveStatus" style="color:blue;font-weight:bold;display:none"></div>
+<button id="addBtn" style="width:100%;background:#FFC200;color:#000;padding:14px;margin-top:10px" onclick="addProduct()">✅ Add Product - Save করুন</button>
+</div>
+
+<div style="margin-top:15px">
+<h3>📋 তোমার সব প্রোডাক্ট - কাস্টমার এগুলোই দেখবে</h3>
+<div id="plist"></div>
+</div>
+</div>
+</div>
+
+<script>
+var DB="https://panchanon-shop-default-rtdb.firebaseio.com";
+var currentImage="";
+
+function doLogin(){loginBox.style.display='none';main.style.display='block';loadOrders();}
+function onFile(input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){var img=new Image();img.onload=function(){var canvas=document.createElement('canvas');var maxW=500;canvas.width=img.width>maxW?maxW:img.width;canvas.height=img.width>maxW?img.height*(maxW/img.width):img.height;var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);currentImage=canvas.toDataURL('image/jpeg',0.6);preview.src=currentImage;preview.style.display='block';photoStatus.style.display='block';photoStatus.innerText='✅ ছবি রেডি! '+Math.round(currentImage.length/1024)+' KB - এবার নাম/দাম লিখে Save চাপো';};img.src=e.target.result;};reader.readAsDataURL(file);}
+function showOrders(){orders.style.display='block';add.style.display='none';btnO.className='b1';btnA.className='b2';loadOrders();}
+function showAdd(){orders.style.display='none';add.style.display='block';btnO.className='b2';btnA.className='b1';loadProducts();}
+async function loadOrders(){var o=orders;o.innerHTML='⏳ লোড হচ্ছে...';try{var r=await fetch(DB+'/orders.json');var d=await r.json()||{};var ks=Object.keys(d).reverse();oc.innerText=ks.length;o.innerHTML=ks.length?'':'<div style="padding:30px;text-align:center">কোনো অর্ডার নেই</div>';for(var k of ks){var od=d[k];var c=od.customer||{};var cart=od.cart||[];var total=od.total||0;if(!total){cart.forEach(it=>total+=Number(it.price||0));}var items=cart.map((x,i)=>`<div style="background:#f5f5f5;margin:4px;padding:6px;border-radius:8px;display:flex;gap:8px;align-items:center"><img src="${x.image||''}" style="width:32px;height:32px;border-radius:6px;object-fit:cover"><span>${i+1} - ${x.name||''} - ${x.qty||x.weight||''} = ₹${x.price||0}</span></div>`).join('');o.innerHTML+=`<div style="background:#fff;margin:10px;padding:12px;border-radius:14px;border-left:5px solid #00b050"><b>🧺 Total: ₹${total}</b><br>👤 ${c.name||''} 📞 ${c.phone||''}<br>🏠 ${c.gram||''} ${c.para||''} ${c.thana||''} ${c.zilla||''} - ${c.pin||''}<br>⏰ ${c.slot||''}<div style="margin-top:8px">${items}</div><br><button style="background:#ff2a2a;color:#fff;padding:8px 14px" onclick="delOrder('${k}')">Delete</button> <a href="tel:${c.phone||''}" style="background:#00b050;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none">📞 Call</a> <a href="https://wa.me/91${c.phone||''}" style="background:#25D366;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none">WhatsApp</a></div>`;}}catch(e){o.innerHTML='Error: '+e}}
+async function delOrder(k){if(confirm('Delete করবে?')){await fetch(DB+'/orders/'+k+'.json',{method:'DELETE'});loadOrders();}}
+async function loadProducts(){try{var r=await fetch(DB+'/products.json');var d=await r.json()||{};var l=plist;l.innerHTML='';for(var k in d){var p=d[k];var w=p.qty||p.weight||'';l.innerHTML+=`<div class=card><img class=thumb src="${p.image}"><div style="flex:1"><b>${p.name}</b><br>${w} - ₹${p.price}</div><button style="background:#ff2a2a;color:#fff;border-radius:8px" onclick="delP('${k}')">Del</button></div>`;}}catch(e){}}
+async function delP(k){if(confirm('Product Delete?')){await fetch(DB+'/products/'+k+'.json',{method:'DELETE'});loadProducts();}}
+async function addProduct(){var btn=addBtn;var st=saveStatus;if(!currentImage){alert('❌ আগে 📸 ক্যামেরা বা 🖼️ গ্যালারি থেকে ছবি নিন');return}var name=pname.value.trim();var price=pprice.value.trim();if(!name||!price){alert('❌ নাম আর দাম দিন');return}btn.innerText='⏳ সেভ হচ্ছে...';btn.disabled=true;st.style.display='block';st.innerText='⏳ Firebase এ সেভ হচ্ছে...';var p={name:name,price:Number(price),qty:pqty.value||'1kg',image:currentImage,on:true};try{var res=await fetch(DB+'/products.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});if(res.ok){st.innerText='✅ সেভ কমপ্লিট! কাস্টমার অ্যাপে চলে গেছে!';pname.value='';pprice.value='';pqty.value='';preview.style.display='none';photoStatus.style.display='none';currentImage='';loadProducts();}else{st.innerText='❌ Error';}}catch(e){st.innerText='❌ Net Error';}btn.innerText='✅ Add Product - Save করুন';btn.disabled=false;}
+</script></body></html>
