@@ -1,1 +1,169 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Panchanan Varieties - P</title><meta name="theme-color" content="#FFC200"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#FFFBEB;font-family:system-ui}.header{background:#000;color:#FFC200;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20}.logo{width:44px;height:44px;background:#FFC200;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px}.btn{width:100%;padding:13px;background:#000;color:#FFC200;border:none;border-radius:12px;font-weight:800;font-size:15px}.btn-y{width:100%;padding:13px;background:#FFC200;color:#000;border:none;border-radius:12px;font-weight:800;font-size:15px}.products{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;padding-bottom:180px}.card{background:#fff;border:2px solid #FFC200;border-radius:14px;padding:10px;box-shadow:0 4px 10px rgba(0,0,0,.08)}.card img{width:100%;height:110px;object-fit:cover;border-radius:10px;background:#fff8c2}.price{color:#000;font-weight:900;margin:4px 0;font-size:16px}.cart{position:fixed;bottom:0;left:0;right:0;background:#000;color:#fff;padding:14px;display:none;z-index:30;border-radius:18px 18px 0 0}.cart.show{display:block}.modal{position:fixed;inset:0;background:#FFC200;display:none;z-index:100;padding:0;overflow:auto}.modal.show{display:flex;flex-direction:column}.modalTop{background:#000;color:#FFC200;padding:10px;text-align:center}.inputYellow{width:100%;padding:12px;margin:6px 0;border:2px solid #000;border-radius:10px;background:#FFF8C2;font-size:15px}.tabs{display:flex;background:#fff;border-bottom:2px solid #000;position:sticky;top:56px;z-index:10}.tab{flex:1;padding:12px;text-align:center;font-weight:800}.tab.active{background:#FFC200;border-bottom:3px solid #000}</style></head><body><div class="header"><div style="display:flex;gap:10px;align-items:center"><div class="logo">P</div><div><b>Panchanan Varieties</b><br><small style="color:#fff">Fresh Groceries</small></div></div><button onclick="shareApp()" style="background:#FFC200;border:none;padding:8px 12px;border-radius:10px;font-weight:700">Share</button></div><div class="tabs"><div class="tab active" id="t1" onclick="showTab('store')">Shop</div><div class="tab" id="t2" onclick="showTab('admin')">Account</div></div><div id="savedInfo" style="text-align:center;padding:6px;font-size:12px"></div><div id="storePage"><div style="padding:10px"><input id="search" oninput="doSearch()" placeholder="Search..." style="width:100%;padding:12px;border-radius:12px;border:2px solid #000;background:#FFF8C2"></div><div class="products" id="plist">লোড হচ্ছে...</div></div><div id="adminPage" style="display:none;padding:12px"><div id="loginBox" style="text-align:center;padding:40px 20px;background:#fff;border-radius:14px;border:2px solid #000"><h3>মালিক লগইন 1234</h3><br><input type="password" id="pass" placeholder="1234" style="width:100%;padding:12px;border-radius:10px;border:2px solid #000"><br><br><button class="btn-y" onclick="login()">লগইন</button></div><div id="adminMain" style="display:none"><div style="background:#fff;padding:12px;border-radius:12px;border:2px solid #000;margin-bottom:12px"><h3>প্রোডাক্ট যোগ</h3><input id="nName" placeholder="নাম" class="inputYellow"><input id="nPrice" type="number" placeholder="দাম" class="inputYellow"><button class="btn-y" onclick="addP()">যোগ</button></div><div style="background:#fff;padding:12px;border-radius:12px;border:2px solid #000"><h3>অর্ডার লিস্ট</h3><div id="olist"></div></div></div></div><div class="cart" id="cartBar"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><span id="ctext"></span><span style="color:#FFC200">Free Delivery</span></div><button class="btn-y" onclick="placeOrder()">অর্ডার কনফার্ম</button></div><div class="modal" id="installModal" style="background:#FFC200"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div class="logo" style="width:90px;height:90px;font-size:60px;background:#000;color:#FFC200">P</div><h1 style="font-size:36px;margin:14px 0;line-height:1">Panchanan<br>Varieties</h1><p>Fresh Groceries, Delivered Fast</p><button class="btn" style="max-width:300px;margin-top:20px" onclick="goToRegister()">Install Now</button></div></div><div class="modal" id="regModal" style="background:#fff"><div class="modalTop">Create Account</div><div style="padding:14px"><p style="text-align:center;margin-bottom:12px">Join Panchanan Varieties</p><label style="font-weight:700">Name</label><input id="fName" class="inputYellow" placeholder="Full name"><label style="font-weight:700">Phone</label><input id="fPhone" type="tel" class="inputYellow" placeholder="+91"><label style="font-weight:700">Gram</label><input id="fGram" class="inputYellow" placeholder="Gram"><label style="font-weight:700">Para</label><input id="fPara" class="inputYellow" placeholder="Para"><label style="font-weight:700">Thana</label><input id="fThana" class="inputYellow" placeholder="Thana"><label style="font-weight:700">Jela</label><input id="fJela" class="inputYellow" placeholder="Jela"><label style="font-weight:700">Pincode</label><input id="fPin" type="number" class="inputYellow" placeholder="Pincode"><button class="btn" style="margin-top:14px" onclick="saveCust()">Create Account</button></div></div><script>const DB="https://panchanon-store-default-rtdb.firebaseio.com";let allP={},cart=[];function getCust(){try{return JSON.parse(localStorage.getItem('pan_7_final'))}catch(e){return null}}function setCust(c){localStorage.setItem('pan_7_final',JSON.stringify(c));showInfo()}function showInfo(){let c=getCust();let b=document.getElementById('savedInfo');if(!c){b.innerHTML='';return}b.innerHTML=`${c.name} | ${c.gram},${c.para} | ${c.phone} <span onclick="openReg()" style="color:blue;text-decoration:underline">বদলান</span>`}function openReg(){document.getElementById('regModal').classList.add('show');let c=getCust();if(c){fName.value=c.name;fPhone.value=c.phone;fGram.value=c.gram;fPara.value=c.para;fThana.value=c.thana;fJela.value=c.jela;fPin.value=c.pin;}}function goToRegister(){document.getElementById('installModal').classList.remove('show');document.getElementById('regModal').classList.add('show')}function saveCust(){let d={name:fName.value.trim(),phone:fPhone.value.trim(),gram:fGram.value.trim(),para:fPara.value.trim(),thana:fThana.value.trim(),jela:fJela.value.trim(),pin:fPin.value.trim()};if(!d.name||d.phone.length<10||!d.gram||!d.para||!d.thana||!d.jela||!d.pin){alert('7 টা ঘরই পূরণ করুন');return}setCust(d);document.getElementById('regModal').classList.remove('show');alert('Account Created '+d.name)}async function load(){showInfo();if(!getCust()){document.getElementById('installModal').classList.add('show');}try{let r=await fetch(DB+'/products.json');allP=await r.json()||{}}catch(e){}if(!allP||Object.keys(allP).length==0){allP={p1:{name:"Potato",price:40,qty:"1kg"},p2:{name:"Onion",price:35,qty:"1kg"},p3:{name:"Tomato",price:30,qty:"500g"}}}render(allP)}function render(list){let h="";for(let k in list){let p=list[k];let img=`https://via.placeholder.com/300/FFFBEB/000?text=${encodeURIComponent(p.name)}`;h+=`<div class="card"><img src="${img}"><h4 style="margin:6px 0">${p.name}</h4><small>${p.qty||''}</small><div class="price">₹${p.price}</div><button class="btn" style="padding:8px;margin-top:6px;font-size:13px" onclick="addCart('${k}')">Add to Cart</button></div>`}document.getElementById('plist').innerHTML=h}function doSearch(){let q=search.value.toLowerCase();let f={};for(let k in allP)if(allP[k].name.toLowerCase().includes(q))f[k]=allP[k];render(f)}function addCart(k){if(!getCust()){document.getElementById('installModal').classList.add('show');return}cart.push(allP[k]);upd()}function upd(){if(cart.length==0){cartBar.classList.remove('show');return}let tot=0;cart.forEach(i=>tot+=Number(i.price||0));ctext.innerText=`${cart.length} item - ₹${tot}`;cartBar.classList.add('show');cartBar.dataset.tot=tot}function clearCart(){cart=[];upd()}async function placeOrder(){if(cart.length==0)return;let c=getCust();if(!c){document.getElementById('installModal').classList.add('show');return}let tot=Number(cartBar.dataset.tot||0);let order={customer:c,cart:cart,total:tot,time:new Date().toLocaleString('bn-IN')};try{await fetch(DB+'/orders.json',{method:'POST',body:JSON.stringify(order)});alert(`Order Success ${c.name}! ₹${tot}`);clearCart()}catch(e){alert('Net নেই')}}function showTab(t){if(t=='store'){storePage.style.display='block';adminPage.style.display='none';t1.classList.add('active');t2.classList.remove('active')}else{storePage.style.display='none';adminPage.style.display='block';t2.classList.add('active');t1.classList.remove('active')}}function login(){if(pass.value=='1234'){loginBox.style.display='none';adminMain.style.display='block';viewOrders()}else alert('1234')}function addP(){let n=nName.value.trim(),pr=parseInt(nPrice.value);if(!n||!pr)return;let id='p'+Date.now();fetch(DB+'/products/'+id+'.json',{method:'PUT',body:JSON.stringify({name:n,price:pr,qty:"1kg"})});allP[id]={name:n,price:pr,qty:"1kg"};render(allP);alert('যোগ হলো')}async function viewOrders(){let d={};try{let r=await fetch(DB+'/orders.json');d=await r.json()||{}}catch(e){}if(!d||Object.keys(d).length==0){olist.innerHTML='কোনো অ
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>পঞ্চানন ভ্যারাইটিস</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FFC200">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fffdf0;font-family:system-ui,sans-serif;padding-bottom:140px}
+.header{background:#FFC200;padding:14px 12px;font-weight:bold;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px #0001}
+.box{padding:20px;max-width:500px;margin:auto}
+input,select{width:100%;padding:15px;margin:8px 0;border:1.5px solid #aaa;border-radius:12px;font-size:16px;background:#fff}
+button{width:100%;padding:16px;margin:8px 0;border:none;border-radius:14px;font-weight:bold;font-size:17px;color:#fff;background:#ff6a00;cursor:pointer}
+.card{background:#fff;padding:12px;margin:10px;border-radius:16px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 10px #0001;border:1px solid #ffe28a}
+.thumb{width:80px;height:80px;border-radius:14px;object-fit:cover;background:#f2f2f2}
+.cart{position:fixed;bottom:12px;left:12px;right:12px;background:#fff;padding:16px;box-shadow:0 8px 30px #0003;max-height:75vh;display:flex;flex-direction:column;z-index:999;border-radius:20px;border:2px solid #FFC200}
+#cItems{overflow-y:auto;max-height:25vh;margin:12px 0;line-height:2;font-size:16px;background:#fffbe6;padding:10px;border-radius:10px}
+.cart-btns{display:flex;gap:12px}
+.searchBox{padding:12px;position:sticky;top:56px;background:#fffdf0;z-index:9}
+</style>
+</head>
+<body>
+
+<!-- 1. লগইন / 7 টা ঘর -->
+<div id="login">
+<div class="box">
+<h2 style="text-align:center">🥦 পঞ্চানন ভ্যারাইটিস</h2>
+<p style="text-align:center;color:#666">আপনার তথ্য দিন - All India Delivery</p>
+<input id="cname" placeholder="1. আপনার নাম *">
+<input id="cphone" type="tel" placeholder="2. ফোন - 10 ডিজিট *" maxlength="10">
+<input id="cgram" placeholder="3. গ্রাম *">
+<input id="cpara" placeholder="4. পাড়া *">
+<input id="cthana" placeholder="5. থানা *">
+<input id="czilla" placeholder="6. জেলা *">
+<input id="cpin" type="number" placeholder="7. পিন কোড *">
+<select id="cslot">
+<option>⏰ সময় বাছুন</option>
+<option>সকাল 7-9</option>
+<option>সকাল 9-12</option>
+<option>দুপুর 12-2</option>
+<option>দুপুর 2-4</option>
+<option>বিকেল 4-6</option>
+<option>সন্ধ্যা 6-রাত্রি 10</option>
+</select>
+<button onclick="goShop()">✅ OK - দোকানে ঢুকুন</button>
+</div>
+</div>
+
+<!-- 2. দোকান -->
+<div id="shop" style="display:none">
+<div class="header">
+<span>🥦 পঞ্চানন - <span id="uname"></span></span>
+<button onclick="viewOrders()" style="width:auto;padding:9px 16px;font-size:14px;background:#000;color:#FFC200;border-radius:12px">📦 অর্ডার</button>
+</div>
+<div class="searchBox"><input id="search" placeholder="🔍 সবজি খুঁজুন - যেমন আলু, পেঁয়াজ, টমেটো"></div>
+<div id="plist" style="padding-bottom:20px">⏳ তাজা সবজি আসছে...</div>
+<div id="cartBox" class="cart" style="display:none">
+<b>🧺 কার্টে আছে - <span id="cCount">0</span> টা</b>
+<div id="cItems"></div>
+<div class="cart-btns">
+<button style="flex:1;background:#00b050" onclick="placeOrder()">✅ অর্ডার করুন</button>
+<button style="flex:1;background:#ff2a2a" onclick="clearCart()">❌ খালি করুন</button>
+</div>
+</div>
+</div>
+
+<!-- 3. অর্ডার দেখা -->
+<div id="ordersView" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2000;padding:15px;overflow-y:auto">
+<h3>📦 সব অর্ডার</h3>
+<div id="ordersList"></div>
+<button onclick="document.getElementById('ordersView').style.display='none'" style="background:#111;margin-top:12px">❌ বন্ধ করুন</button>
+</div>
+
+<script>
+var DB="https://panchanon-shop-default-rtdb.firebaseio.com";
+var cart=[];var allP={};var currentCust=null;
+
+function goShop(){
+ var n=document.getElementById('cname').value.trim();
+ var ph=document.getElementById('cphone').value.trim();
+ var gram=document.getElementById('cgram').value.trim();
+ var para=document.getElementById('cpara').value.trim();
+ var thana=document.getElementById('cthana').value.trim();
+ var zilla=document.getElementById('czilla').value.trim();
+ var pin=document.getElementById('cpin').value.trim();
+ var slot=document.getElementById('cslot').value;
+ if(n==""){alert('নাম লিখুন');return}
+ if(ph.length!=10){alert('10 ডিজিট ফোন লিখুন');return}
+ document.getElementById('uname').innerText=n;
+ document.getElementById('login').style.display='none';
+ document.getElementById('shop').style.display='block';
+ currentCust={name:n,phone:ph,gram:gram,para:para,thana:thana,zilla:zilla,pin:pin,slot:slot};
+ try{localStorage.setItem('panchanon_cust',JSON.stringify(currentCust))}catch(e){}
+ loadProducts();
+}
+
+async function loadProducts(){
+ document.getElementById('plist').innerHTML='⏳ লোড হচ্ছে...';
+ try{
+  var r=await fetch(DB+'/products.json');var d=await r.json();allP=d||{};
+ }catch(e){allP={}}
+ // Firebase খালি থাকলে 8 টা সবজি দেখাবে
+ if(Object.keys(allP).length==0){
+  allP={
+   p1:{name:"আলু 1kg",price:30,qty:"1kg",image:"https://images.unsplash.com/photo-1518977676608-bd36c2ca7b9a?w=400"},
+   p2:{name:"পেঁয়াজ 1kg",price:40,qty:"1kg",image:"https://images.unsplash.com/photo-1508747703725-719777637510?w=400"},
+   p3:{name:"টমেটো 1kg",price:35,qty:"1kg",image:"https://images.unsplash.com/photo-1561136594-7f68413baa99?w=400"},
+   p4:{name:"কাঁচা লঙ্কা 250g",price:20,qty:"250g",image:"https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400"},
+   p5:{name:"ফুলকপি 1 পিস",price:25,qty:"1 পিস",image:"https://images.unsplash.com/photo-1566842600175-8d7dd4468aa0?w=400"},
+   p6:{name:"বাঁধাকপি 1 পিস",price:30,qty:"1 পিস",image:"https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=400"},
+   p7:{name:"বেগুন 1kg",price:45,qty:"1kg",image:"https://images.unsplash.com/photo-1573813483807-3d76a374d39c?w=400"},
+   p8:{name:"লাউ 1 পিস",price:35,qty:"1 পিস",image:"https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=400"}
+  }
+ }
+ renderProducts(allP);
+}
+
+function renderProducts(list){
+ var html='';
+ for(var k in list){
+  var p=list[k];if(!p.image)continue;
+  html+=`<div class="card">
+   <img class="thumb" src="${p.image}">
+   <div style="flex:1"><b>${p.name}</b><br><small>${p.qty||''}</small> - <b style="color:#ff6a00">₹${p.price}</b></div>
+   <button style="width:auto;padding:12px 18px;background:#111;color:#FFC200;border-radius:12px" onclick="addCart('${k}')">Add</button>
+  </div>`;
+ }
+ document.getElementById('plist').innerHTML=html;
+}
+
+document.getElementById('search').addEventListener('input',function(e){
+ var q=e.target.value.toLowerCase();var filtered={};
+ for(var k in allP){if(allP[k].name.toLowerCase().includes(q))filtered[k]=allP[k];}
+ renderProducts(filtered);
+});
+
+function addCart(k){
+ cart.push(allP[k]);var total=0;cart.forEach(it=>total+=Number(it.price||0));
+ document.getElementById('cartBox').style.display='flex';
+ document.getElementById('cCount').innerText=cart.length;
+ document.getElementById('cItems').innerHTML=cart.map((x,i)=>`${i+1}. ${x.name} = ₹${x.price}`).join('<br>')+`<br><br><b>💰 Total: ₹${total}</b>`;
+}
+function clearCart(){cart=[];document.getElementById('cartBox').style.display='none';}
+
+async function placeOrder(){
+ if(cart.length==0)return;
+ var total=0;cart.forEach(it=>total+=Number(it.price||0));
+ var cust=currentCust;try{if(!cust)cust=JSON.parse(localStorage.getItem('panchanon_cust'))}catch(e){}
+ if(!cust){alert('আবার তথ্য দিন');location.reload();return;}
+ await fetch(DB+'/orders.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer:cust,cart:cart,total:total,status:'pending',time:Date.now()})});
+ alert('✅ অর্ডার সফল! '+cust.name+' - Total ₹'+total);cart=[];document.getElementById('cartBox').style.display='none';
+}
+
+async function viewOrders(){
+ document.getElementById('ordersView').style.display='block';
+ document.getElementById('ordersList').innerHTML='⏳ লোড হচ্ছে...';
+ var r=await fetch(DB+'/orders.json');var d=await r.json();
+ if(!d){document.getElementById('ordersList').innerHTML='কোনো অর্ডার নেই';return}
+ var html='';Object.values(d).reverse().forEach(o=>{
+  var c=o.customer||{};var items=(o.cart||[]).map(x=>x.name).join(', ');
+  html+=`<div style="border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:12px;background:#fffbe6"><b>👤 ${c.name} - ${c.phone}</b><br>📍 ${c.gram}, ${c.para}, ${c.thana}, ${c.zilla} - ${c.pin}<br>🕒 ${c.slot}<br><hr>🛒 ${items}<br>💰 Total ₹${o.total}<br><small>${new Date(o.time).toLocaleString('bn-IN')}</small></div>`;
+ });
+ document.getElementById('ordersList').innerHTML=html;
+}
+</script>
+</body>
+  </html>
